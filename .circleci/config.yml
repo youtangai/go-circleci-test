@@ -7,18 +7,18 @@ jobs:
       TEST_RESULTS: /tmp/test-results
 
     steps:
-      - checkout
-      - run: mkdir -p $TEST_RESULTS
-      - restore_cache:
+      - checkout # clone source code
+      - run: mkdir -p $TEST_RESULTS # create dir which store test result
+      - restore_cache: # restore go modules
           keys:
             - go-mod-{{ checksum "go.sum" }}
       - run:
-          name: unit test
+          name: Unit test
           command: |
-            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
-            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- $PACKAGE_NAMES
+            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname) # get all package name
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- $PACKAGE_NAMES # test all packages, export test result to gotestsum-report.xml
       - run:
-          name: build bin
+          name: Build binary
           command: go build -o main
       - save_cache:
           key: go-mod-{{ checksum "go.sum" }}

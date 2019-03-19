@@ -5,6 +5,7 @@ jobs:
       - image: circleci/golang:1.12
     steps:
       - checkout
+      - run: cat go.sum
       - restore_cache:
           keys:
             - go-mod-{{ checksum "go.sum" }}
@@ -17,6 +18,7 @@ jobs:
       - run:
           name: diplay mods
           command: ls /go/pkg/mod/github.com
+      - run: cat go.sum
       - save_cache:
           key: go-mod-{{ checksum "go.sum" }}
           paths:

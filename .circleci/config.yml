@@ -5,7 +5,6 @@ jobs:
       - image: circleci/golang:1.12
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
       - restore_cache:
           keys:
             - go-mod-{{ checksum "go.sum" }}

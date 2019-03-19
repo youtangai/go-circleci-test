@@ -3,6 +3,9 @@ jobs:
   build:
     docker:
       - image: circleci/golang:1.12
+    environment:
+      TEST_RESULTS: /tmp/test-results
+
     steps:
       - checkout
       - restore_cache:
@@ -10,7 +13,9 @@ jobs:
             - go-mod-{{ checksum "go.sum" }}
       - run:
           name: unit test
-          command: go test -v ./...
+          command: |
+            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- $PACKAGE_NAMES
       - run:
           name: build bin
           command: go build -o main
@@ -18,3 +23,8 @@ jobs:
           key: go-mod-{{ checksum "go.sum" }}
           paths:
             - "/go/pkg/mod"
+      - store_artifacts: # upload test summary for display in Artifacts
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results: # upload test results for display in Test Summary
+          path: /tmp/test-results

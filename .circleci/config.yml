@@ -1,22 +1,21 @@
 version: 2
 jobs:
-  one:
+  build:
     docker:
-      - image: circleci/ruby:2.4.1
+      - image: circleci/golang:1.12
     steps:
       - checkout
-      - run: echo "A first Hello"
-      - run: sleep 10
-  two:
-    docker:
-      - image: circleci/ruby:2.4.1
-    steps:
-      - checkout
-      - run: echo "second hello"
-      - run: sleep 5
-workflows:
-  version: 2
-  hello:
-    jobs:
-      - one
-      - two
+      - run: mkdir -p $TEST_RESULTS
+      - restore_cache:
+          keys:
+            - go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: unit test
+          command: go test -v ./...
+      - run:
+          name: build bin
+          command: go build -o main
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
